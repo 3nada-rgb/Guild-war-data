@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>전투 기록 입력</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body>
+
+<h2>전투 기록 입력</h2>
+
+날짜: <input type="date" id="date"><br><br>
+
+공격1: <input list="characters" id="attacker1"><br>
+공격2: <input list="characters" id="attacker2"><br>
+공격3: <input list="characters" id="attacker3"><br>
+
+수비1: <input list="characters" id="defender1"><br>
+수비2: <input list="characters" id="defender2"><br>
+수비3: <input list="characters" id="defender3"><br>
+
+결과:
+<select id="result">
+  <option value="1">공격 승</option>
+  <option value="0">공격 패</option>
+</select>
+
+<br><br>
+<button onclick="saveBattle()">저장</button>
+
+<datalist id="characters"></datalist>
+
+<script>
+  const supabase = window.supabase.createClient(
+    "여기에_SUPABASE_URL",
+    "여기에_PUBLIC_ANON_KEY"
+  );
+
+  let characters = [];
+
+  async function loadCharacters() {
+    const { data } = await supabase
+      .from("characters")
+      .select("id, name")
+      .order("name");
+
+    characters = data;
+
+    const datalist = document.getElementById("characters");
+    data.forEach(char => {
+      const option = document.createElement("option");
+      option.value = char.name;
+      datalist.appendChild(option);
+    });
+  }
+
+  function getIdByName(name) {
+    return characters.find(c => c.name === name)?.id;
+  }
+
+  async function saveBattle() {
+    const { error } = await supabase.from("battles_input").insert({
+      date: document.getElementById("date").value,
+      attacker1: document.getElementById("attacker1").value,
+      attacker2: document.getElementById("attacker2").value,
+      attacker3: document.getElementById("attacker3").value,
+      defender1: document.getElementById("defender1").value,
+      defender2: document.getElementById("defender2").value,
+      defender3: document.getElementById("defender3").value,
+      result: parseInt(document.getElementById("result").value)
+    });
+
+    if (error) {
+      alert("저장 실패: " + error.message);
+    } else {
+      alert("저장 완료!");
+    }
+  }
+
+  loadCharacters();
+</script>
+
+</body>
+</html>
